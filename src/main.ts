@@ -2,24 +2,27 @@ import './style.css'
 import Vector2 from './Vector2';
 
 const PI = Math.PI;
-const Phi = (1 + Math.sqrt(5)) / 2;
+const Ratio = 2;
 
 const canvasEl: HTMLCanvasElement = document.querySelector('#canvas');
 
 // Implementing a two dimention Spirpinski n-gon (aka Polyflake)
 class Pentagon {
-  private dots = 5;
-  private radius = 300;
+  private dots = 3;
+  private radius = 400;
   private _ctx: CanvasRenderingContext2D;
   private canvasHeight = 0;
   private canvasWidth = 0;
   private canvasMiddle: Vector2;
   private edges: Vector2[] = [];
-  private latestDot: Vector2 = new Vector2();
+  private latestPoint: Vector2 = new Vector2(0, 0);
   private colors = {
-    edges: '#fff',
+    edges: '#f00',
     center: '#ff0',
+    dot: '#fff',
   }
+
+  private iterations = 0;
 
   constructor(canvasElement: HTMLCanvasElement) {
 
@@ -50,13 +53,47 @@ class Pentagon {
   }
 
   // A random dot must be placed between v1 and v2 at golden ratio distance.
-  placeRandomDot(v1: Vector2): void {
-    const rand = Math.floor(Math.random() * (this.dots - 1));
-    const v2 = this.edges[rand];
+  placeRandomDot(): void {
+    const rand = Math.floor(Math.random() * (this.dots));
+    const edge = this.edges[rand];
+    this.iterations += 1;
+
+    if (this.iterations > 65000) {
+      this.iterations = 0;
+    }
+
+    // Rand number between 1 and Phi:
+    const scalar = 1 / (Math.random() * (2 - Ratio) + Ratio);
+
+    if (this.latestPoint.x === 0) {
+      this.latestPoint = new Vector2(this.canvasMiddle.x, this.canvasMiddle.y);
+      console.log('called');
+      console.log('#' + this.iterations.toString(16));
+    }
+
+    const x0 = this.latestPoint.x;
+    const y0 = this.latestPoint.y;
+    const x1 = edge.x;
+    const y1 = edge.y;
+    const r = 1 / scalar;
+
+    const p1 = this.latestPoint.copy();
+    const p2 = edge.copy();
+
+    p1.multiply(1 - scalar);
+    p2.multiply(scalar);
+    this.latestPoint = p1.sum(p2);
+
+    this._ctx.fillStyle = 'white';
+    this._ctx.fillRect(this.latestPoint.x, this.latestPoint.y, 1, 1);
   }
 }
 
 if (canvasEl) {
   const pentagon = new Pentagon(canvasEl);
   pentagon.initPentagonPoints();
+
+  for (let i = 0; i < 100000; i++) {
+    pentagon.placeRandomDot();
+  }
 }

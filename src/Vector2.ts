@@ -26,6 +26,28 @@ class Vector2 {
   public distance(v2: Vector2): number {
     return Math.sqrt(v2.x + v2.y);
   }
+
+  public multiply(scalar: number): Vector2 {
+    this.x *= scalar;
+    this.y *= scalar;
+    return this;
+  }
+
+  public divide(scalar: number): Vector2 {
+    this.x /= scalar;
+    this.y /= scalar;
+    return this;
+  }
+
+  public copy(): Vector2 {
+    return new Vector2(this.x, this.y);
+  }
+
+  public sum(v2: Vector2): Vector2 {
+    this.x += v2.x;
+    this.y += v2.y;
+    return this;
+  }
 }
 
 export default Vector2;
